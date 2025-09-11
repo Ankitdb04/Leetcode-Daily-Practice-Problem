@@ -1,0 +1,24 @@
+Solution:
+class Solution {
+    public String sortVowels(String s) {
+        String vowel="AEIOUaeiou";
+        List <Character> vowellist=new ArrayList<>();
+
+        for(char ch: s.toCharArray()){
+            if(vowel.indexOf(ch)!=-1){
+                vowellist.add(ch);
+            }
+        }
+        Collections.sort(vowellist);
+        StringBuilder result=new StringBuilder();
+        int j=0;
+        for(char ch: s.toCharArray()){
+            if(vowel.indexOf(ch)!=-1){
+                result.append(vowellist.get(j++));
+            }else{
+                result.append(ch);
+            }
+        }
+        return result.toString();
+    }
+}
