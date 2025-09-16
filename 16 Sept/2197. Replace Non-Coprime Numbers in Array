@@ -1,0 +1,45 @@
+import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    
+    // Helper function for GCD (Euclidean Algorithm)
+    private long gcd(long a, long b) {
+        while (b != 0) {
+            long temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+
+    public List<Integer> replaceNonCoprimes(int[] nums) {
+        // Use ArrayList as a stack
+        ArrayList<Long> result = new ArrayList<>(); // Use long for intermediate LCMs
+        
+        for (int num : nums) {
+            long currentNum = (long) num;
+            
+            while (!result.isEmpty()) {
+                long top = result.get(result.size() - 1);
+                long g = gcd(top, currentNum);
+                
+                if (g == 1) {
+                    break; // Coprime
+                }
+                
+                // Non-coprime, merge
+                result.remove(result.size() - 1); // Pop
+                currentNum = (top / g) * currentNum; // Calculate LCM
+            }
+            result.add(currentNum);
+        }
+        
+        // Convert back to List<Integer>
+        List<Integer> finalResult = new ArrayList<>();
+        for (long val : result) {
+            finalResult.add((int) val);
+        }
+        return finalResult;
+    }
+}
