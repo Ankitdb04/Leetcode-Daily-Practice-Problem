@@ -1,0 +1,61 @@
+import java.util.*;
+
+class FoodRatings {
+    // Maps for quick lookup
+    private Map<String, String> foodToCuisine;  // food -> cuisine
+    private Map<String, Integer> foodToRating;  // food -> rating
+    private Map<String, PriorityQueue<Food>> cuisineToFoods; // cuisine -> maxHeap
+
+    // Constructor
+    public FoodRatings(String[] foods, String[] cuisines, int[] ratings) {
+        foodToCuisine = new HashMap<>();
+        foodToRating = new HashMap<>();
+        cuisineToFoods = new HashMap<>();
+
+        for (int i = 0; i < foods.length; i++) {
+            String food = foods[i];
+            String cuisine = cuisines[i];
+            int rating = ratings[i];
+
+            foodToCuisine.put(food, cuisine);
+            foodToRating.put(food, rating);
+
+            cuisineToFoods.putIfAbsent(cuisine, new PriorityQueue<>(
+                (a, b) -> a.rating != b.rating ? b.rating - a.rating : a.name.compareTo(b.name)
+            ));
+            cuisineToFoods.get(cuisine).add(new Food(food, rating));
+        }
+    }
+
+    // Change rating of a food
+    public void changeRating(String food, int newRating) {
+        String cuisine = foodToCuisine.get(food);
+        foodToRating.put(food, newRating);
+        cuisineToFoods.get(cuisine).add(new Food(food, newRating)); // push new state
+    }
+
+    // Get highest rated food for a cuisine
+    public String highestRated(String cuisine) {
+        PriorityQueue<Food> pq = cuisineToFoods.get(cuisine);
+
+        // Lazy deletion: pop until top is up-to-date
+        while (true) {
+            Food top = pq.peek();
+            if (top.rating == foodToRating.get(top.name)) {
+                return top.name;
+            }
+            pq.poll(); // remove outdated entry
+        }
+    }
+
+    // Helper class for food items
+    private static class Food {
+        String name;
+        int rating;
+
+        Food(String name, int rating) {
+            this.name = name;
+            this.rating = rating;
+        }
+    }
+}
