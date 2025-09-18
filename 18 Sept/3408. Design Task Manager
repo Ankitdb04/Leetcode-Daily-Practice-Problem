@@ -1,0 +1,63 @@
+import java.util.*;
+
+class TaskManager {
+    class Task {
+        int userId, taskId, priority;
+        Task(int userId, int taskId, int priority) {
+            this.userId = userId;
+            this.taskId = taskId;
+            this.priority = priority;
+        }
+    }
+
+    private Map<Integer, Task> taskMap; // taskId -> latest Task
+    private PriorityQueue<Task> maxHeap; // candidates (may contain stale entries)
+
+    public TaskManager(List<List<Integer>> tasks) {
+        taskMap = new HashMap<>();
+        maxHeap = new PriorityQueue<>((a, b) -> {
+            if (a.priority != b.priority) return b.priority - a.priority; // higher priority first
+            return b.taskId - a.taskId; // if tie, higher taskId first
+        });
+
+        for (List<Integer> t : tasks) {
+            int userId = t.get(0), taskId = t.get(1), priority = t.get(2);
+            Task task = new Task(userId, taskId, priority);
+            taskMap.put(taskId, task);
+            maxHeap.offer(task);
+        }
+    }
+    
+    public void add(int userId, int taskId, int priority) {
+        Task task = new Task(userId, taskId, priority);
+        taskMap.put(taskId, task);
+        maxHeap.offer(task);
+    }
+    
+    public void edit(int taskId, int newPriority) {
+        Task old = taskMap.get(taskId);
+        if (old == null) return;
+        Task updated = new Task(old.userId, taskId, newPriority);
+        taskMap.put(taskId, updated);
+        maxHeap.offer(updated); // old copy becomes stale
+    }
+    
+    public void rmv(int taskId) {
+        taskMap.remove(taskId); // leave stale copies in heap; they'll be skipped
+    }
+    
+    public int execTop() {
+        while (!maxHeap.isEmpty()) {
+            Task top = maxHeap.poll();
+            Task current = taskMap.get(top.taskId);
+
+            // Validate BOTH priority and userId so stale entries (including re-added with same priority) are skipped
+            if (current != null && current.priority == top.priority && current.userId == top.userId) {
+                taskMap.remove(top.taskId);
+                return top.userId;
+            }
+            // otherwise stale -> continue
+        }
+        return -1;
+    }
+}
