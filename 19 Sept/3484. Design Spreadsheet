@@ -1,0 +1,44 @@
+class Spreadsheet {
+    private int[][] cells; // rows x 26 grid
+
+    public Spreadsheet(int rows) {
+        cells = new int[rows][26]; // initialize with 0
+    }
+
+    // Set a cell value
+    public void setCell(String cell, int value) {
+        int[] pos = parseCell(cell);
+        cells[pos[0]][pos[1]] = value;
+    }
+
+    // Reset a cell to 0
+    public void resetCell(String cell) {
+        int[] pos = parseCell(cell);
+        cells[pos[0]][pos[1]] = 0;
+    }
+
+    // Evaluate formula of type =X+Y
+    public int getValue(String formula) {
+        formula = formula.substring(1); // remove '='
+        String[] parts = formula.split("\\+");
+        return evaluate(parts[0]) + evaluate(parts[1]);
+    }
+
+    // Helper: evaluate either a cell or an integer
+    private int evaluate(String s) {
+        if (Character.isLetter(s.charAt(0))) {
+            int[] pos = parseCell(s);
+            return cells[pos[0]][pos[1]];
+        } else {
+            return Integer.parseInt(s);
+        }
+    }
+
+    // Helper: parse cell string like "A1" into [row, col]
+    private int[] parseCell(String cell) {
+        char colChar = cell.charAt(0);
+        int col = colChar - 'A';
+        int row = Integer.parseInt(cell.substring(1)) - 1; // 1-indexed
+        return new int[]{row, col};
+    }
+}
