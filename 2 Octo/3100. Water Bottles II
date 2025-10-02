@@ -1,0 +1,27 @@
+class Solution {
+    public int maxBottlesDrunk(int numBottles, int numExchange) {
+        int sum=numBottles;
+        int empty=numBottles;
+        while(empty>=numExchange){
+            empty-=numExchange;
+            numExchange++;
+            empty++;
+            sum++;
+        }
+        return sum;
+    }
+}
+class Solution {
+    public int maxBottlesDrunk(int numBottles, int numExchange) {
+        int sum = numBottles;   // drink all initial bottles
+        int empty = numBottles; // all become empty
+
+        for (; empty >= numExchange; numExchange++) {
+            empty -= numExchange; // spend empties
+            sum++;                // drink new bottle
+            empty++;              // get empty back
+        }
+
+        return sum;
+    }
+}
