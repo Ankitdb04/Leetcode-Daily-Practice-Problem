@@ -1,0 +1,99 @@
+given an m x n integer matrix heightMap representing the height of each unit cell in a 2D elevation map, return the volume of water it can trap after raining.
+ Solution:
+ 🔹 Optimal Approach → Priority Queue + BFS (Dijkstra-like)
+
+We use a min-heap (priority queue) to always expand from the lowest boundary inward.
+
+Steps:
+
+Push all border cells into a min-heap with their heights.
+
+Because border cells cannot hold water (water leaks out).
+
+Keep a visited matrix to mark processed cells.
+
+While heap is not empty:
+
+Pop the lowest cell (current boundary).
+
+Look at its 4 neighbors.
+
+If neighbor not visited:
+
+If neighbor’s height < boundary height → water can be trapped:
+
+water
++
+=
+boundaryHeight
+−
+neighborHeight
+water+=boundaryHeight−neighborHeight
+
+Update neighbor’s height to:
+
+max
+⁡
+(
+neighborHeight
+,
+boundaryHeight
+)
+max(neighborHeight,boundaryHeight)
+
+(because water raises the effective boundary).
+
+Push neighbor into heap.
+
+Continue until all cells processed.
+
+🔹 Complexity
+
+Each cell is pushed/popped once → O(m·n log(m·n)) due to heap.
+
+Space: O(m·n) for visited + heap.
+
+🔹 Java Solution
+import java.util.*;
+
+class Solution {
+    public int trapRainWater(int[][] heightMap) {
+        int m = heightMap.length, n = heightMap[0].length;
+        if (m <= 2 || n <= 2) return 0; // no space to trap water
+
+        boolean[][] visited = new boolean[m][n];
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[2] - b[2]);
+
+        // Step 1: Push all border cells
+        for (int i = 0; i < m; i++) {
+            pq.offer(new int[]{i, 0, heightMap[i][0]});
+            pq.offer(new int[]{i, n - 1, heightMap[i][n - 1]});
+            visited[i][0] = visited[i][n - 1] = true;
+        }
+        for (int j = 1; j < n - 1; j++) {
+            pq.offer(new int[]{0, j, heightMap[0][j]});
+            pq.offer(new int[]{m - 1, j, heightMap[m - 1][j]});
+            visited[0][j] = visited[m - 1][j] = true;
+        }
+
+        // Directions (N, S, E, W)
+        int[][] dirs = {{1,0},{-1,0},{0,1},{0,-1}};
+        int water = 0;
+
+        // Step 2: Process heap
+        while (!pq.isEmpty()) {
+            int[] cell = pq.poll();
+            int x = cell[0], y = cell[1], h = cell[2];
+
+            for (int[] d : dirs) {
+                int nx = x + d[0], ny = y + d[1];
+                if (nx >= 0 && nx < m && ny >= 0 && ny < n && !visited[nx][ny]) {
+                    visited[nx][ny] = true;
+                    water += Math.max(0, h - heightMap[nx][ny]);
+                    pq.offer(new int[]{nx, ny, Math.max(heightMap[nx][ny], h)});
+                }
+            }
+        }
+        return water;
+    }
+}
