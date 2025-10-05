@@ -1,0 +1,45 @@
+class Solution {
+    public List<List<Integer>> pacificAtlantic(int[][] heights) {
+        List<List<Integer>> result = new ArrayList<>();
+        if (heights == null || heights.length == 0) return result;
+
+        int rows = heights.length, cols = heights[0].length;
+        boolean[][] pacific = new boolean[rows][cols];
+        boolean[][] atlantic = new boolean[rows][cols];
+
+        // DFS from Pacific (top row and left column)
+        for (int i = 0; i < rows; i++) {
+            dfs(heights, pacific, Integer.MIN_VALUE, i, 0);
+            dfs(heights, atlantic, Integer.MIN_VALUE, i, cols - 1);
+        }
+
+        for (int j = 0; j < cols; j++) {
+            dfs(heights, pacific, Integer.MIN_VALUE, 0, j);
+            dfs(heights, atlantic, Integer.MIN_VALUE, rows - 1, j);
+        }
+
+        // Collect cells reachable by both
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (pacific[i][j] && atlantic[i][j]) {
+                    result.add(Arrays.asList(i, j));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private void dfs(int[][] heights, boolean[][] visited, int prevHeight, int i, int j) {
+        if (i < 0 || i >= heights.length || j < 0 || j >= heights[0].length) return;
+        if (visited[i][j]) return;
+        if (heights[i][j] < prevHeight) return; // cannot flow uphill
+
+        visited[i][j] = true;
+
+        dfs(heights, visited, heights[i][j], i + 1, j);
+        dfs(heights, visited, heights[i][j], i - 1, j);
+        dfs(heights, visited, heights[i][j], i, j + 1);
+        dfs(heights, visited, heights[i][j], i, j - 1);
+    }
+}
