@@ -1,0 +1,26 @@
+class Solution {
+    public int[] successfulPairs(int[] spells, int[] potions, long success) {
+        int n=spells.length;
+        int m=potions.length;
+        Arrays.sort(potions);
+        int ans[]=new int [n];
+         for (int i = 0; i < n; i++) {
+            long minPotion = (success + spells[i] - 1) / spells[i]; // ceil(success / spell)
+            int idx = lowerBound(potions, minPotion); // find first potion >= minPotion
+            ans[i] = m - idx; // all potions from idx → end will work
+        }
+
+        return ans;
+    }
+    private int lowerBound(int[] potions, long target) {
+        int low = 0, high = potions.length;
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (potions[mid] < target)
+                low = mid + 1;
+            else
+                high = mid;
+        }
+        return low;
+    }
+}
