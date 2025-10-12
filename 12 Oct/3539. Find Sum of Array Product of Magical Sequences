@@ -1,0 +1,69 @@
+// Java solution (compatible with LeetCode)
+class Solution {
+    private static final int MOD = 1_000_000_007;
+
+    public int magicalSum(int m, int k, int[] nums) {
+        int n = nums.length;
+        // comb[a][b] = C(a,b) mod MOD, a up to m
+        int[][] comb = getComb(m, m);
+
+        // memo[mRemaining][kRemaining][index][carry] -> Integer or null
+        Integer[][][][] memo = new Integer[m + 1][k + 1][n + 1][m + 1];
+        return dp(m, k, 0, 0, nums, memo, comb);
+    }
+
+    private int dp(int mRem, int kRem, int idx, int carry, int[] nums,
+                   Integer[][][][] memo, int[][] comb) {
+        // invalid states
+        if (mRem < 0 || kRem < 0 || (mRem + Integer.bitCount(carry) < kRem)) return 0;
+        if (mRem == 0) {
+            // all slots assigned: final check whether remaining k equals bitcount of carry
+            return (kRem == Integer.bitCount(carry)) ? 1 : 0;
+        }
+        if (idx == nums.length) return 0;
+        if (memo[mRem][kRem][idx][carry] != null) return memo[mRem][kRem][idx][carry];
+
+        long res = 0;
+        // choose how many times we use index `idx` among the mRem slots
+        for (int count = 0; count <= mRem; ++count) {
+            // number of ways to choose which of the mRem slots are filled with idx (combinatorial)
+            long ways = comb[mRem][count];
+            // multiplicative contribution for the product: nums[idx]^count (mod MOD)
+            long p = modPow(nums[idx], count);
+            long contribution = (ways * p) % MOD;
+
+            int newCarryTotal = carry + count;      // add count to current bit (carry is integer)
+            int bitAtThisPos = newCarryTotal % 2;  // final bit at this position after addition
+            int nextCarry = newCarryTotal / 2;     // carry forwarded to next index
+
+            // dp for remaining slots, remaining bits, next index, nextCarry
+            int sub = dp(mRem - count, kRem - bitAtThisPos, idx + 1, nextCarry, nums, memo, comb);
+            res = (res + contribution * sub) % MOD;
+        }
+
+        memo[mRem][kRem][idx][carry] = (int) res;
+        return (int) res;
+    }
+
+    private int[][] getComb(int n, int k) {
+        int[][] comb = new int[n + 1][k + 1];
+        for (int i = 0; i <= n; ++i) comb[i][0] = 1;
+        for (int i = 1; i <= n; ++i) {
+            for (int j = 1; j <= k; ++j) {
+                comb[i][j] = (comb[i - 1][j] + comb[i - 1][j - 1]) % MOD;
+            }
+        }
+        return comb;
+    }
+
+    private long modPow(long x, int e) {
+        long res = 1;
+        x %= MOD;
+        while (e > 0) {
+            if ((e & 1) == 1) res = (res * x) % MOD;
+            x = (x * x) % MOD;
+            e >>= 1;
+        }
+        return res;
+    }
+}
