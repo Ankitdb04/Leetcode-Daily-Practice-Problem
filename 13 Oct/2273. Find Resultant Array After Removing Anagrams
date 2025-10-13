@@ -1,0 +1,36 @@
+class Solution {
+    public List<String> removeAnagrams(String[] words) {
+        List<String> ans=new ArrayList<>();
+        ans.add(words[0]);
+        int n=words.length;
+        for(int i=1;i<n;i++){
+            if(!anagram(words[i-1],words[i])){
+                ans.add(words[i]);
+            }
+        }
+        return ans;
+    }
+    private boolean anagram(String s1,String s2){
+        if (s1.length() != s2.length()) return false;
+        
+        // for lowercase a-z
+        int[] freq = new int[26];  
+
+        // Count frequency of each character in s1
+        for (int i = 0; i < s1.length(); i++)
+            freq[s1.charAt(i) - 'a']++;
+
+        // Subtract frequency using characters from s2
+        for (int i = 0; i < s2.length(); i++)
+            freq[s2.charAt(i) - 'a']--;
+
+        // Check if all frequencies are zero
+        for (int count : freq) {
+            if (count != 0)
+                return false;
+        }
+
+        return true;
+    
+    }
+}
