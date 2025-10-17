@@ -1,0 +1,55 @@
+import java.util.*;
+
+class Solution {
+    int n, k;
+    String s;
+    Map<String, Integer> memo;
+
+    public int maxPartitionsAfterOperations(String s, int k) {
+        this.s = s;
+        this.k = k;
+        this.n = s.length();
+        this.memo = new HashMap<>();
+
+        return dfs(0, 0, true);
+    }
+
+    // dfs(i, mask, canChange): max partitions from index i onwards
+    private int dfs(int i, int mask, boolean canChange) {
+        if (i == n) return 1; // one final partition
+
+        String key = i + "," + mask + "," + canChange;
+        if (memo.containsKey(key)) return memo.get(key);
+
+        int bit = 1 << (s.charAt(i) - 'a');
+        int res = 0;
+
+        // ----- Option 1: Don't change current char -----
+        int newMask = mask | bit;
+        if (Integer.bitCount(newMask) <= k) {
+            // still valid within same partition
+            res = dfs(i + 1, newMask, canChange);
+        } else {
+            // exceed k → cut partition here
+            res = 1 + dfs(i + 1, bit, canChange);
+        }
+
+        // ----- Option 2: Change current char (if available) -----
+        if (canChange) {
+            for (int ch = 0; ch < 26; ch++) {
+                int newBit = 1 << ch;
+                if (newBit == bit) continue; // same char → skip
+
+                int changedMask = mask | newBit;
+                if (Integer.bitCount(changedMask) <= k) {
+                    res = Math.max(res, dfs(i + 1, changedMask, false));
+                } else {
+                    res = Math.max(res, 1 + dfs(i + 1, newBit, false));
+                }
+            }
+        }
+
+        memo.put(key, res);
+        return res;
+    }
+}
