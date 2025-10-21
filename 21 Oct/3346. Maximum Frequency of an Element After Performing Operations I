@@ -1,0 +1,56 @@
+import java.util.*;
+
+class Solution {
+    public int maxFrequency(int[] nums, int k, int numOperations) {
+        Arrays.sort(nums);
+        int n = nums.length;
+
+        // frequency map of original values
+        Map<Integer,Integer> freq = new HashMap<>();
+        for (int v : nums) freq.put(v, freq.getOrDefault(v, 0) + 1);
+
+        int ans = 1;
+        // iterate distinct values (we'll only check values that appear in nums)
+        // to avoid duplicate work, iterate over unique values
+        int i = 0;
+        while (i < n) {
+            int x = nums[i];
+            int already = freq.get(x);
+
+            // find count of elements in [x - k, x + k] using binary search
+            int leftIdx = lowerBound(nums, x - k);
+            int rightIdx = upperBound(nums, x + k); // first index > x+k
+            int inWindow = rightIdx - leftIdx;
+
+            int possible = already + Math.min(numOperations, inWindow - already);
+            ans = Math.max(ans, possible);
+
+            // skip duplicates of x
+            i += already;
+        }
+
+        return ans;
+    }
+
+    // returns first index >= target
+    private int lowerBound(int[] a, int target) {
+        int l = 0, r = a.length;
+        while (l < r) {
+            int m = l + (r - l) / 2;
+            if (a[m] < target) l = m + 1;
+            else r = m;
+        }
+        return l;
+    }
+
+    // returns first index > target
+    private int upperBound(int[] a, int target) {
+        int l = 0, r = a.length;
+        while (l < r) {
+            int m = l + (r - l) / 2;
+            if (a[m] <= target) l = m + 1;
+            else r = m;
+        }
+        return l;
+    }
+}
