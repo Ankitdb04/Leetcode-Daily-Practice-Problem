@@ -1,0 +1,45 @@
+import java.util.*;
+
+class Solution {
+    public int maxFrequency(int[] nums, int k, int numOperations) {
+        int n = nums.length;
+        if (n == 0) return 0;
+
+        // count occurrences of exact values
+        Map<Integer, Integer> count = new HashMap<>();
+        // line sweep events: at position p add delta (+1 or -1)
+        TreeMap<Integer, Integer> events = new TreeMap<>();
+        // candidate set of positions to evaluate
+        TreeSet<Integer> candidates = new TreeSet<>();
+
+        for (int v : nums) {
+            count.merge(v, 1, Integer::sum);
+
+            int start = v - k;
+            int endPlusOne = v + k + 1; // exclusive end
+
+            events.merge(start, 1, Integer::sum);
+            events.merge(endPlusOne, -1, Integer::sum);
+
+            candidates.add(v);
+            candidates.add(start);
+            candidates.add(endPlusOne);
+        }
+
+        int ans = 1;
+        int adjustable = 0; // prefix sum of events
+
+        // iterate candidates (sorted). For each candidate value x,
+        // 'adjustable' is how many intervals [num-k, num+k] cover x.
+        for (int x : candidates) {
+            adjustable += events.getOrDefault(x, 0);
+            int countX = count.getOrDefault(x, 0);
+            int adjustableNotEqual = adjustable - countX;
+            // we can convert at most numOperations of those adjustableNotEqual
+            int total = countX + Math.min(numOperations, Math.max(0, adjustableNotEqual));
+            ans = Math.max(ans, total);
+        }
+
+        return ans;
+    }
+}
