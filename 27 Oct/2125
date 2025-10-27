@@ -1,0 +1,21 @@
+class Solution {
+    public int numberOfBeams(String[] bank) {
+        int prevCount = 0;    // count of '1's in the previous non-empty row
+        int result = 0;
+        
+        for (String row : bank) {
+            int cur = 0;
+            // count '1's in current row
+            for (int i = 0; i < row.length(); i++) {
+                if (row.charAt(i) == '1') cur++;
+            }
+            if (cur > 0) {
+                // beams between this row and previous non-empty row
+                result += prevCount * cur;
+                prevCount = cur; // update previous non-empty row count
+            }
+            // if cur == 0, just skip (empty row)
+        }
+        return result;
+    }
+}
