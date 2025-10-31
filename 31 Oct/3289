@@ -1,0 +1,16 @@
+class Solution {
+    public int[] getSneakyNumbers(int[] nums) {
+        final int MAX = 100;  // given constraints
+        int[] count = new int[MAX + 1];
+        int[] ans = new int[2];
+        int idx = 0;
+        for (int num : nums) {
+            count[num]++;
+            if (count[num] == 2) {
+                ans[idx++] = num;
+                if (idx == 2) break;
+            }
+        }
+        return ans;
+    }
+}
