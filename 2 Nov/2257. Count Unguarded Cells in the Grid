@@ -1,0 +1,45 @@
+class Solution {
+    public int countUnguarded(int m, int n, int[][] guards, int[][] walls) {
+        // 0 = empty, 1 = guard, 2 = wall, 3 = guarded
+        int[][] grid = new int[m][n];
+        
+        // mark guards
+        for (int[] g : guards) {
+            grid[g[0]][g[1]] = 1;
+        }
+        // mark walls
+        for (int[] w : walls) {
+            grid[w[0]][w[1]] = 2;
+        }
+        
+        // For each guard, cast rays in 4 directions until a wall or another guard
+        int[] dr = {-1, 1, 0, 0}; // up, down, left, right
+        int[] dc = {0, 0, -1, 1};
+        
+        for (int[] g : guards) {
+            int r = g[0], c = g[1];
+            for (int d = 0; d < 4; d++) {
+                int nr = r + dr[d], nc = c + dc[d];
+                while (nr >= 0 && nr < m && nc >= 0 && nc < n) {
+                    if (grid[nr][nc] == 2 || grid[nr][nc] == 1) {
+                        // hit a wall or another guard: stop this direction
+                        break;
+                    }
+                    // mark as guarded (even if already marked, overwrite with 3)
+                    grid[nr][nc] = 3;
+                    nr += dr[d];
+                    nc += dc[d];
+                }
+            }
+        }
+        
+        // Count unguarded empty cells (cells still 0)
+        int ans = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 0) ans++;
+            }
+        }
+        return ans;
+    }
+}
