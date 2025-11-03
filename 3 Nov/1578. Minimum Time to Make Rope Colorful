@@ -1,0 +1,21 @@
+class Solution {
+    public int minCost(String colors, int[] neededTime) {
+        int n = colors.length();
+        int i = 0;
+        long ans = 0;
+        
+        while (i < n) {
+            char c = colors.charAt(i);
+            long sum = 0;
+            int max = 0;
+            // process group of same color
+            while (i < n && colors.charAt(i) == c) {
+                sum += neededTime[i];
+                if (neededTime[i] > max) max = neededTime[i];
+                i++;
+            }
+            ans += (sum - max); // remove all except the highest-cost one
+        }
+        return (int) ans;
+    }
+}
