@@ -1,0 +1,62 @@
+class Solution {
+    public long maxPower(int[] stations, int r, long k) {
+        int n = stations.length;
+        long[] power = new long[n];
+
+        // Compute initial power for each city: sum of stations in [i-r, i+r]
+        long windowSum = 0;
+        // build initial window for i = 0 using indices [0, r]
+        for (int j = 0; j <= Math.min(n - 1, r); ++j) windowSum += stations[j];
+        power[0] = windowSum;
+        for (int i = 1; i < n; ++i) {
+            int addIdx = i + r;
+            int remIdx = i - r - 1;
+            if (addIdx < n) windowSum += stations[addIdx];
+            if (remIdx >= 0) windowSum -= stations[remIdx];
+            power[i] = windowSum;
+        }
+
+        long low = Long.MAX_VALUE, high = Long.MIN_VALUE;
+        for (long v : power) {
+            low = Math.min(low, v);
+            high = Math.max(high, v);
+        }
+        // Maximum possible min power cannot exceed current max power + k
+        high = high + k;
+
+        long ans = low;
+        while (low <= high) {
+            long mid = low + (high - low) / 2;
+            if (canReach(power, r, k, mid)) {
+                ans = mid;
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return ans;
+    }
+
+    // Check if we can make every city have at least target power using <= k added units
+    private boolean canReach(long[] power, int r, long k, long target) {
+        int n = power.length;
+        long used = 0;
+        long[] diff = new long[n + 1]; // diff array for range-adds
+        long addWindow = 0; // current addition applied to this city from previous range adds
+        int reach = 2 * r + 1;
+
+        for (int i = 0; i < n; ++i) {
+            addWindow += diff[i];
+            long current = power[i] + addWindow;
+            if (current < target) {
+                long need = target - current;
+                used += need;
+                if (used > k) return false;
+                addWindow += need;
+                int end = i + reach;
+                if (end < n) diff[end] -= need; // removal point for this addition
+            }
+        }
+        return true;
+    }
+}
