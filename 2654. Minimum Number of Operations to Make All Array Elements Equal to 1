@@ -1,0 +1,36 @@
+import java.util.*;
+
+class Solution {
+    public int minOperations(int[] nums) {
+        int n = nums.length;
+        int ones = 0;
+        for (int num : nums) {
+            if (num == 1) ones++;
+        }
+        if (ones > 0) return n - ones;
+
+        // Compute overall GCD
+        int overallGcd = nums[0];
+        for (int num : nums) {
+            overallGcd = gcd(overallGcd, num);
+        }
+        if (overallGcd > 1) return -1;
+
+        int minLen = Integer.MAX_VALUE;
+        for (int i = 0; i < n; i++) {
+            int g = nums[i];
+            for (int j = i + 1; j < n; j++) {
+                g = gcd(g, nums[j]);
+                if (g == 1) {
+                    minLen = Math.min(minLen, j - i + 1);
+                    break;
+                }
+            }
+        }
+        return n + minLen - 2;
+    }
+
+    private int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
