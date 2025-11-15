@@ -1,0 +1,99 @@
+class Solution {
+    public int numberOfSubstrings(String s) {
+        int n = s.length();
+        long ans = 0L;
+
+        // 1) handle z = 0: substrings with zero '0' (i.e., all-ones substrings)
+        long run = 0;
+        for (int i = 0; i < n; ++i) {
+            if (s.charAt(i) == '1') run++;
+            else {
+                ans += run * (run + 1) / 2;
+                run = 0;
+            }
+        }
+        ans += run * (run + 1) / 2;
+
+        // 2) collect zero positions
+        java.util.ArrayList<Integer> zeros = new java.util.ArrayList<>();
+        for (int i = 0; i < n; ++i) if (s.charAt(i) == '0') zeros.add(i);
+        int m = zeros.size();
+
+        // 3) for z >= 1
+        for (int z = 1; z * z <= n && z <= m; ++z) {
+            // iterate over every group of z consecutive zeros
+            for (int i = 0; i + z - 1 < m; ++i) {
+                int leftZeroIdx = zeros.get(i);
+                int rightZeroIdx = zeros.get(i + z - 1);
+
+                int prevZeroIdx = (i == 0) ? -1 : zeros.get(i - 1);
+                int nextZeroIdx = (i + z == m) ? n : zeros.get(i + z);
+
+                // number of possible left-extensions (adding leading ones)
+                long L = leftZeroIdx - prevZeroIdx;   // choices for where substring can start (0..L-1 extra ones)
+                long R = nextZeroIdx - rightZeroIdx;  // choices for where substring can end (0..R-1 extra ones)
+
+                // ones already inside the minimal window that contains exactly these z zeros
+                long internalOnes = (rightZeroIdx - leftZeroIdx + 1L) - z;
+
+                // we need: internalOnes + leftExt + rightExt >= z*z
+                long need = (long) z * z - internalOnes;
+
+                if (need <= 0) {
+                    // every combination of left/right extensions works
+                    ans += L * R;
+                    continue;
+                }
+
+                long maxPossibleExtension = (L - 1) + (R - 1);
+                if (need > maxPossibleExtension) {
+                    // impossible to reach required ones for this zero-group
+                    continue;
+                }
+
+                // Count pairs (l, r) with l in [0..L-1], r in [0..R-1] s.t. l + r >= need
+                // total pairs = L*R
+                // count_bad = number of pairs with l + r <= need - 1
+                long K = need - 1; // we count sums <= K as bad
+                long total = L * R;
+                long countBad = countPairsWithSumAtMost(L, R, K);
+                ans += (total - countBad);
+            }
+        }
+
+        return (int) ans; // LeetCode expects int; cast is safe if constraints guarantee it fits
+    }
+
+    // Returns number of pairs (l, r) with l in [0..L-1], r in [0..R-1] and l + r <= K
+    private long countPairsWithSumAtMost(long L, long R, long K) {
+        if (K < 0) return 0;
+        long total = L * R;
+        long maxSum = (L - 1) + (R - 1);
+        if (K >= maxSum) return total;
+
+        // For each l (0..L-1), possible r are 0..min(R-1, K - l)
+        // so t_l = max(0, min(R, K - l + 1))
+        // We'll compute sum efficiently.
+
+        long count = 0;
+
+        // a = number of l values for which K - l + 1 >= R  -> t_l = R
+        long a = Math.max(0L, K - (R - 1) + 1); // condition: l <= K - (R-1)
+        if (a > L) a = L; // cannot exceed L
+
+        count += a * R;
+
+        // remaining l from a to b = min(L-1, K)
+        long b = Math.min(L - 1, K);
+        if (b >= a) {
+            long terms = b - a + 1; // number of l values in this middle region
+            // t_l runs from (K - a + 1) down to (K - b + 1)
+            long first = K - a + 1;
+            long last = K - b + 1;
+            // sum = (first + last) * terms / 2
+            count += (first + last) * terms / 2;
+        }
+
+        return count;
+    }
+}
