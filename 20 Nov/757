@@ -1,0 +1,36 @@
+import java.util.*;
+
+class Solution {
+    public int intersectionSizeTwo(int[][] intervals) {
+        Arrays.sort(intervals, (a, b) ->
+            a[1] == b[1] ? b[0] - a[0] : a[1] - b[1]
+        );
+
+        int p1 = -1, p2 = -1; // last two chosen points
+        int count = 0;
+
+        for (int[] I : intervals) {
+            int start = I[0], end = I[1];
+
+            boolean hasP1 = p1 >= start;
+            boolean hasP2 = p2 >= start;
+
+            if (hasP1 && hasP2) {
+                continue; // already satisfied
+            }
+
+            if (hasP2) {
+                // Need 1 more
+                count++;
+                p1 = p2;
+                p2 = end;
+            } else {
+                // Need 2 more
+                count += 2;
+                p1 = end - 1;
+                p2 = end;
+            }
+        }
+        return count;
+    }
+}
