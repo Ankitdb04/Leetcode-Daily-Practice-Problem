@@ -1,0 +1,35 @@
+class Solution {
+    public int countPalindromicSubsequence(String s) {
+        int n = s.length();
+        int ans = 0;
+
+        // For each character 'a' to 'z'
+        for (char ch = 'a'; ch <= 'z'; ch++) {
+            int left = -1, right = -1;
+
+            // Find first and last occurrence
+            for (int i = 0; i < n; i++) {
+                if (s.charAt(i) == ch) {
+                    if (left == -1) left = i;
+                    right = i;
+                }
+            }
+
+            // If character appears less than 2 times, skip
+            if (left == -1 || right == -1 || left == right) continue;
+
+            // Track which characters exist between left and right
+            boolean[] seen = new boolean[26];
+            for (int i = left + 1; i < right; i++) {
+                seen[s.charAt(i) - 'a'] = true;
+            }
+
+            // Count distinct middle chars
+            for (boolean x : seen) {
+                if (x) ans++;
+            }
+        }
+
+        return ans;
+    }
+}
