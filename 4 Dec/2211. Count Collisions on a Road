@@ -1,0 +1,23 @@
+.class Solution {
+    public int countCollisions(String s) {
+        int n = s.length();
+        int left = 0, right = n - 1;
+        
+        // skip leading L's
+        while (left < n && s.charAt(left) == 'L') left++;
+        
+        // skip trailing R's
+        while (right >= 0 && s.charAt(right) == 'R') right--;
+        
+        int collisions = 0;
+        
+        // Count all L and R in the remaining middle part
+        for (int i = left; i <= right; i++) {
+            if (s.charAt(i) == 'L' || s.charAt(i) == 'R') {
+                collisions++;
+            }
+        }
+        
+        return collisions;
+    }
+}
