@@ -1,0 +1,40 @@
+class Solution {
+    public int numberOfWays(String corridor) {
+        final int MOD = 1_000_000_007;
+
+        int totalSeats = 0;
+        for (char c : corridor.toCharArray()) {
+            if (c == 'S') totalSeats++;
+        }
+
+        // Must have even number of seats and at least 2
+        if (totalSeats == 0 || totalSeats % 2 != 0) return 0;
+
+        long ways = 1;
+        int seatCount = 0;
+        int plantCount = 0;
+        boolean betweenSegments = false;
+
+        for (char c : corridor.toCharArray()) {
+            if (c == 'S') {
+                seatCount++;
+
+                // Completed a segment of 2 seats
+                if (seatCount % 2 == 0) {
+                    betweenSegments = true;
+                } 
+                // Starting a new segment after previous
+                else if (seatCount > 1) {
+                    ways = (ways * (plantCount + 1)) % MOD;
+                    plantCount = 0;
+                    betweenSegments = false;
+                }
+            } 
+            else if (betweenSegments) {
+                plantCount++;
+            }
+        }
+
+        return (int) ways;
+    }
+}
