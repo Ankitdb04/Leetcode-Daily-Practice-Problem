@@ -1,0 +1,45 @@
+import java.util.*;
+
+class Solution {
+
+    public int maximizeSquareHoleArea(int n, int m, int[] hBars, int[] vBars) {
+
+        // Step 1: Sort both arrays to detect consecutive bars
+        Arrays.sort(hBars);
+        Arrays.sort(vBars);
+
+        // Step 2: Find longest consecutive sequence in horizontal bars
+        int maxH = longestConsecutive(hBars);
+
+        // Step 3: Find longest consecutive sequence in vertical bars
+        int maxV = longestConsecutive(vBars);
+
+        // Step 4: Actual merged dimensions
+        int height = maxH + 1;
+        int width  = maxV + 1;
+
+        // Step 5: Largest square area
+        int side = Math.min(height, width);
+        return side * side;
+    }
+
+    // Utility method to compute longest consecutive sequence length
+    private int longestConsecutive(int[] bars) {
+
+        int maxLen = 0;
+        int currLen = 1;
+
+        for (int i = 1; i < bars.length; i++) {
+            if (bars[i] == bars[i - 1] + 1) {
+                currLen++;
+            } else {
+                maxLen = Math.max(maxLen, currLen);
+                currLen = 1;
+            }
+        }
+
+        // Final update
+        maxLen = Math.max(maxLen, currLen);
+        return maxLen;
+    }
+}
