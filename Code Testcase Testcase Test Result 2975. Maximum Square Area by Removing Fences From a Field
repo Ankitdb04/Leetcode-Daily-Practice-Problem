@@ -1,0 +1,50 @@
+import java.util.*;
+
+class Solution {
+    static final long MOD = 1_000_000_007L;
+
+    public int maximizeSquareArea(int m, int n, int[] hFences, int[] vFences) {
+
+        // Step 1: Add boundary fences
+        int[] h = new int[hFences.length + 2];
+        int[] v = new int[vFences.length + 2];
+
+        h[0] = 1;
+        h[h.length - 1] = m;
+        v[0] = 1;
+        v[v.length - 1] = n;
+
+        for (int i = 0; i < hFences.length; i++) {
+            h[i + 1] = hFences[i];
+        }
+        for (int i = 0; i < vFences.length; i++) {
+            v[i + 1] = vFences[i];
+        }
+
+        Arrays.sort(h);
+        Arrays.sort(v);
+
+        // Step 2: Collect all horizontal distances
+        Set<Long> horizontalDistances = new HashSet<>();
+        for (int i = 0; i < h.length; i++) {
+            for (int j = i + 1; j < h.length; j++) {
+                horizontalDistances.add((long) h[j] - h[i]);
+            }
+        }
+
+        // Step 3: Find largest common distance
+        long maxSide = -1;
+        for (int i = 0; i < v.length; i++) {
+            for (int j = i + 1; j < v.length; j++) {
+                long dist = (long) v[j] - v[i];
+                if (horizontalDistances.contains(dist)) {
+                    maxSide = Math.max(maxSide, dist);
+                }
+            }
+        }
+
+        // Step 4: Return result
+        if (maxSide == -1) return -1;
+        return (int) ((maxSide * maxSide) % MOD);
+    }
+}
